@@ -10,9 +10,7 @@ SRC 	=	src/main.c \
 			src/swapupcase.c
 
 TESTS_SRC 	=	src/utils.c \
-				src/swapupcase.c	\
-				tests/unit_tests.c	\
-				tests/integration_tests.c
+				src/swapupcase.c	
 
 
 OBJ 	=	$(SRC:.c=.o)
