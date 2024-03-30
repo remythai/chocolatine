@@ -4,7 +4,7 @@ on:
   push:
     branches-ignore:
       - " ga-ignore-*"
-  pull:
+  pull_request:
       - " ga-ignore-"
 
 env:
