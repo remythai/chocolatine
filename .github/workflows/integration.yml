@@ -1,0 +1,74 @@
+name: continous-integration
+
+on:
+    push:
+        branches-ignore: [ga-ignore-*]
+    pull_request:
+        branches-ignore: [ga-ignore-*]
+
+jobs:
+
+    coding-style:
+          name: Run Banana
+          runs-on: ubuntu-latest
+          container: 
+              image: ghcr.io/epitech/coding-style-checker:latest
+          
+          steps:
+
+              - name: Checkout GH repo
+                uses: actions/checkout@master
+
+              - name: Run coding-style checker
+                run: check.sh $(pwd) $(pwd)
+
+              - name: Report banana result
+                run:  |
+                  NB_ERROR=$(cat coding-style-reports.log |
+                  wc -l)
+                  if [ $NB_ERROR -gt 0 ]; then
+                    ERROR=$(cat coding-style-reports.log)
+                    echo "::error title=$NB_ERROR errors
+                    found::$ERROR"
+                    exit 1
+                  fi
+                  exit 0
+
+    compile:
+        runs-on: ubuntu-latest
+        steps:
+
+            - name: Checkout GH repo
+              uses: actions/checkout@master
+
+            - name: Compile repository
+              run: make
+
+            - name: Check binary presence
+              run: |
+                if [ ! -f ./swapupcase ]; then
+                    echo "::error file=swapupcase,
+                    title=Binary error:: Binary not found"
+                    exit 1
+                fi
+                exit 0
+
+    run-tests:
+        runs-on: ubuntu-latest
+        name: Run Unit & Integration Tests
+        container: epitechcontent/epitest-docker:latest
+        needs: [compile, coding-style]
+
+        steps:
+
+            - name: Checkout GH repo
+              uses: actions/checkout@master
+
+            - name: Compile tests binaries
+              run:  make compile_tests
+
+            - name: Run unit tests
+              run: ./unit_testing
+
+            - name: Run integration tests
+              run:  ./integration_testing
