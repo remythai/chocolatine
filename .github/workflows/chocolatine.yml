@@ -31,7 +31,6 @@ jobs:
           fi
 
   coding_style:
-    needs: not_test_job
     runs-on: ubuntu-latest
     name: Run Banana
     container:
@@ -83,7 +82,7 @@ jobs:
       runs-on: ubuntu-latest
       name: Run Unit & Integration Tests
       container: epitechcontent/epitest-docker:latest
-      needs: [compile, coding-style]
+      needs: compile
 
       steps:
 
