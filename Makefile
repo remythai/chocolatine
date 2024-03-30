@@ -4,14 +4,13 @@
 ## File description:
 ## Makefile
 ##
-	
+
 SRC 	=	src/main.c \
 			src/utils.c \
 			src/swapupcase.c
 
 TESTS_SRC 	=	src/utils.c \
 				src/swapupcase.c	
-
 
 OBJ 	=	$(SRC:.c=.o)
 
