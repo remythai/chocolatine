@@ -45,7 +45,7 @@ jobs:
         continue-on-error: true
 
       - name: Report banana result
-                run:  |
+                run: |
                   NB_ERROR=$(cat coding-style-reports.log |
                   wc -l)
                   if [ $NB_ERROR -gt 0 ]; then
