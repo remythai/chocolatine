@@ -1,0 +1,113 @@
+name: Chocolatine
+
+on:
+  push:
+    branches-ignore:
+      - " ga-ignore-*"
+  pull:
+      - " ga-ignore-"
+
+env:
+  MIRROR_URL: git@github.com:remythai/chocolatine.git
+  EXECUTABLES: "swapupcase"
+
+jobs:
+  not_test_job:
+    runs-on:  ubuntu-latest
+    steps:
+      - name: Checkout GH repository
+        uses: actions/checkout@v4
+        with:
+          repository: ' '
+      - name: No test job
+        run:  |
+          if [[ "${{github.repository}}" == "git@github.com:remythai/chocolatine.git"]]; then
+            echo "No test are run in this job. It stops immediately."
+            exit 1
+          else
+            exit 0
+          fi
+
+  coding_style:
+    needs: not_test_job
+    runs-on: ubuntu-latest
+    name: Run Banana
+    container:
+        image: ghcr.io/epitech/coding-style-checker:latest
+
+    steps:
+      - name: Checkout GH repo
+        uses: actions/checkout@v4
+
+      - name: Run Coding-style Checker
+        run: |
+          docker run --rm -v $(pwd):/workspace ghcr.io/epitech/coding-style-checker:latest /bin/bash -c "check.sh \$(pwd) \$(pwd)"
+        continue-on-error: true
+
+      - name: Report banana result
+                run:  |
+                  NB_ERROR=$(cat coding-style-reports.log |
+                  wc -l)
+                  if [ $NB_ERROR -gt 0 ]; then
+                    ERROR=$(cat coding-style-reports.log)
+                    echo "::error title=$NB_ERROR errors
+                    found::$ERROR"
+                    exit 1
+                  fi
+                  exit 0
+
+  compile:
+        runs-on: ubuntu-latest
+        steps:
+
+            - name: Checkout GH repo
+              uses: actions/checkout@v4
+
+            - name: Compile repository
+              run: make
+
+            - name: Check binary presence
+              run: |
+                if [ ! -f ./swapupcase ]; then
+                    echo "::error file=swapupcase,
+                    title=Binary error:: Binary not found"
+                    exit 1
+                fi
+                exit 0
+
+
+    run-tests:
+        runs-on: ubuntu-latest
+        name: Run Unit & Integration Tests
+        container: epitechcontent/epitest-docker:latest
+        needs: [compile, coding-style]
+
+        steps:
+
+            - name: Checkout GH repo
+              uses: actions/checkout@master
+
+            - name: Compile tests binaries
+              run:  make compile_tests
+
+            - name: Run unit tests
+              run: ./unit_testing
+
+            - name: Run integration tests
+              run:  ./integration_testing
+
+  push_to_mirror:
+    name: Push to Mirror Repository
+    runs-on: ubuntu-latest
+    needs: run-tests
+    if: github.event_name == 'push'
+    steps:
+      - name: Checkout GH repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Push to Mirror
+        uses: pixta-dev/repository-mirroring-action@v1.1.1  
+        with:
+          ssh_private_key: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
+          repository_url: ${{ env.MIRROR_URL }}
