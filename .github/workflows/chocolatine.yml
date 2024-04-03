@@ -38,6 +38,7 @@ jobs:
 
     compile:
         runs-on: ubuntu-latest
+        timeout-minutes: 2
         steps:
 
             - name: Checkout GH repo
@@ -58,6 +59,7 @@ jobs:
     run-tests:
         runs-on: ubuntu-latest
         name: Run Unit & Integration Tests
+        timeout-minutes: 2
         container: epitechcontent/epitest-docker:latest
         needs: [compile, coding-style]
 
