@@ -11,6 +11,7 @@
 
 #define EPITECH_OK 0
 #define EPITECH_KO 84
+#define TEST 99
 #define ERROR -1
 
 int swapupcase(char *str);
