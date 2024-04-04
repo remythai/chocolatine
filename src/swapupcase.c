@@ -14,7 +14,7 @@ int swapupcase(char *str)
 {
     int size = my_strlen(str);
     bool is_string_odd = (size % 2) == 1;
-    int res = 0;
+    int res = 0;  
 
     if (str == NULL)
         return EPITECH_KO;
